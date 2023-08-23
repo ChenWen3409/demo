@@ -2,7 +2,7 @@
  * @ Author: wen chen
  * @ Create Time: 2023-08-09 16:08:59
  * @ Modified by: wen chen
- * @ Modified time: 2023-08-11 18:10:06
+ * @ Modified time: 2023-08-23 16:52:17
  * @ Description:
  */
 
@@ -63,7 +63,31 @@ public:
      * @param[in] planName the name of the executing work plan
      * @return Status code
      */
-    Status executeRobotPlan(flexiv::Robot* robotPtr, std::string planName);
+    Status excuteRobotPlan(flexiv::Robot* robotPtr, std::string planName);
+
+    /**
+     * @brief Execute the primitive "home"
+     * @param[in] robotPtr robot's pointer
+     * @return Status code
+     */
+    Status executeRobotPrimitiveHome(flexiv::Robot* robotPtr);
+
+    /**
+     * @brief Set global variables for the robot by specifying name and value.
+     * @param[in] robotPtr robot's pointer
+     * @param[in] globalVars Command to set global variables using the format:
+     * globalVar1=value(s), globalVar2=value(s), ...
+     */
+    Status setRobotGlobalVar(flexiv::Robot* robotPtr, const std::string& globalVars);
+
+    /**
+     * @brief Get available global variables from the robot.
+     * @param[in] robotPtr robot's pointer
+     * @param[in] Global variables string vector
+     * @return Global variables in the format of a string list.
+     */
+    Status getRobotGlobalVar(
+        flexiv::Robot* robotPtr, std::vector<std::string>& GlobalVarList) const;
 };
 
 } /* namespace kostal */

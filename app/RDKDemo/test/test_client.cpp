@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
         // Write
         std::string stringtemp = "";
         Json::Value config;
-        config["TOKEN"] = "kostal";
+        config["TOKEN"] = "flexiv";
         stringtemp = Json::FastWriter().write(config);
         std::cout << "The client's init msg is: " << stringtemp;
         const char* request = stringtemp.c_str();
@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
         config2["TM_FLEXIV_QUERY_STATUS"] = "true";
         config2["TM_FLEXIV_TERMINATE"] = "false";
         config2["TM_FLEXIV_TASK_TYPE"] = "NORMAL";
-        config2["TM_FLEXIV_TASK_NAME"] = "Kostal-P417";
+        config2["TM_FLEXIV_TASK_NAME"] = "P417";
         stringtemp = Json::FastWriter().write(config2);
         request = stringtemp.c_str();
         int i = 3;
@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
         config2["TM_FLEXIV_QUERY_STATUS"] = "true";
         stringtemp = Json::FastWriter().write(config2);
         request = stringtemp.c_str();
-        i = 50;
+        i = 500;
         while (i > 0) {
             boost::asio::write(s1, boost::asio::buffer(request, std::strlen(request)));
             std::cout << "The client task msg is: " << stringtemp << std::endl;

@@ -2,7 +2,7 @@
  * @ Author: wen chen
  * @ Create Time: 2023-08-09 16:23:50
  * @ Modified by: wen chen
- * @ Modified time: 2023-08-12 16:00:05
+ * @ Modified time: 2023-08-23 15:31:04
  * @ Description:
  */
 #include "JsonParser.hpp"
@@ -117,7 +117,7 @@ Status JsonParser::parseTaskJSON(
     std::cout << "****************************************************" << std::endl;
     std::cout << "Task message received!" << std::endl;
     std::cout << "The received taskType is: " + *taskType << std::endl;
-    std::cout << "The received taskName is : + *taskName " << std::endl;
+    std::cout << "The received taskName is: " + *taskName << std::endl;
     std::cout << "****************************************************" << std::endl;
 
     return SUCCESS;

@@ -2,7 +2,7 @@
  * @ Author: wen chen
  * @ Create Time: 2023-08-09 16:23:50
  * @ Modified by: wen chen
- * @ Modified time: 2023-08-09 21:34:55
+ * @ Modified time: 2023-08-23 17:10:22
  * @ Description:
  */
 
@@ -29,8 +29,7 @@ Status RobotOperations::buildRobotConnection(flexiv::Robot* robotPtr)
 
         // Check fault again
         if (robotPtr->isFault()) {
-            k_log->error(
-                        "===================================================");
+            k_log->error("===================================================");
             k_log->error("Robot's fault cannot be cleared, exiting ...");
 
             return ROBOT;
@@ -48,15 +47,6 @@ Status RobotOperations::buildRobotConnection(flexiv::Robot* robotPtr)
     }
     std::cout << "The robot is now operational" << std::endl;
 
-    // Set mode after robot is operational
-    robotPtr->setMode(flexiv::Mode::NRT_PLAN_EXECUTION);
-    
-    // Wait for the mode to be switched
-    while (robotPtr->getMode() != flexiv::Mode::NRT_PLAN_EXECUTION) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
-    }
-    std::cout << "The robot is now in plan execution mode" << std::endl;
-
     return SUCCESS;
 }
 
@@ -70,8 +60,7 @@ Status RobotOperations::clearTinyFault(flexiv::Robot* robotPtr)
         std::this_thread::sleep_for(std::chrono::seconds(2));
         // Check again
         if (robotPtr->isFault()) {
-            k_log->error(
-                        "===================================================");
+            k_log->error("===================================================");
             k_log->error("Robot's fault cannot be cleared, exiting ...");
             return ROBOT;
         } else {
@@ -82,8 +71,8 @@ Status RobotOperations::clearTinyFault(flexiv::Robot* robotPtr)
     return SUCCESS;
 }
 
-Status RobotOperations::collectSyncData(flexiv::Robot* robotPtr,
-                                        RobotData* robotDataPtr, std::list<RobotData>* robotDataListPtr)
+Status RobotOperations::collectSyncData(
+    flexiv::Robot* robotPtr, RobotData* robotDataPtr, std::list<RobotData>* robotDataListPtr)
 {
     while (g_collectSwitch) {
         // get plan info
@@ -103,7 +92,6 @@ Status RobotOperations::collectSyncData(flexiv::Robot* robotPtr,
         // only collect when collect flag is on
         if (g_dataCollectFlag == true) {
             robotDataPtr->nodeName = planInfo.nodeName;
-
             // get robot states
             flexiv::RobotStates robotStates;
             {
@@ -112,7 +100,9 @@ Status RobotOperations::collectSyncData(flexiv::Robot* robotPtr,
                 robotDataPtr->tcpPose = robotStates.tcpPose;
                 robotDataPtr->rawDataForceSensor = robotStates.ftSensorRaw;
                 robotDataPtr->flangePose = robotStates.flangePose;
-                robotDataPtr->timestamp = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+                robotDataPtr->timestamp = std::chrono::duration_cast<std::chrono::microseconds>(
+                    std::chrono::system_clock::now().time_since_epoch())
+                                              .count();
 
                 // put data instance to list
                 robotDataListPtr->push_back(*robotDataPtr);
@@ -124,13 +114,11 @@ Status RobotOperations::collectSyncData(flexiv::Robot* robotPtr,
     return SUCCESS;
 }
 
-bool RobotOperations::checkRobotPlan(
-        flexiv::Robot* robotPtr, std::string planName)
+bool RobotOperations::checkRobotPlan(flexiv::Robot* robotPtr, std::string planName)
 {
     auto planList = robotPtr->getPlanNameList();
 
-    if (std::find(planList.begin(), planList.end(), planName)
-            == planList.end()) {
+    if (std::find(planList.begin(), planList.end(), planName) == planList.end()) {
         k_log->error("=================================================");
         k_log->error("The robot does not have planName: " + planName);
         return false;
@@ -139,11 +127,36 @@ bool RobotOperations::checkRobotPlan(
     return true;
 }
 
-Status RobotOperations::executeRobotPlan(
-        flexiv::Robot* robotPtr, std::string planName)
+Status RobotOperations::excuteRobotPlan(flexiv::Robot* robotPtr, std::string planName)
 {
+    // Set mode after robot is operational
+    robotPtr->setMode(flexiv::Mode::NRT_PLAN_EXECUTION);
+
+    // Wait for the mode to be switched
+    while (robotPtr->getMode() != flexiv::Mode::NRT_PLAN_EXECUTION) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+
+    std::cout << "The robot is now in plan execution mode" << std::endl;
     // execute plan by name
     robotPtr->executePlan(planName);
+
+    return SUCCESS;
+}
+
+Status RobotOperations::executeRobotPrimitiveHome(flexiv::Robot* robotPtr)
+{
+    // Set mode after robot is operational
+    robotPtr->setMode(flexiv::Mode::NRT_PRIMITIVE_EXECUTION);
+
+    // Wait for the mode to be switched
+    while (robotPtr->getMode() != flexiv::Mode::NRT_PRIMITIVE_EXECUTION) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+
+    std::cout << "The robot is now in primitive execution mode" << std::endl;
+    // execute plan by name
+    robotPtr->executePrimitive("Home()");
 
     // sleep when robot is prepare to execute
     while (robotPtr->isBusy()) {
@@ -153,4 +166,27 @@ Status RobotOperations::executeRobotPlan(
     return SUCCESS;
 }
 
+Status RobotOperations::setRobotGlobalVar(flexiv::Robot* robotPtr, const std::string& globalVars)
+{
+    // Set mode after robot is operational
+    robotPtr->setMode(flexiv::Mode::NRT_PLAN_EXECUTION);
+
+    // Wait for the mode to be switched
+    while (robotPtr->getMode() != flexiv::Mode::NRT_PLAN_EXECUTION) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+
+    std::cout << "The robot is now in plan execution mode" << std::endl;
+
+    robotPtr->setGlobalVariables(globalVars);
+
+    return SUCCESS;
+}
+
+Status RobotOperations::getRobotGlobalVar(
+    flexiv::Robot* robotPtr, std::vector<std::string>& GlobalVarList) const
+{
+    GlobalVarList = robotPtr->getGlobalVariables();
+    return SUCCESS;
+}
 } /* namespace kostal */

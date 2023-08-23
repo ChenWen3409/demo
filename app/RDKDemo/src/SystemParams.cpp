@@ -2,7 +2,7 @@
  * @ Author: wen chen
  * @ Create Time: 2023-08-09 16:23:50
  * @ Modified by: wen chen
- * @ Modified time: 2023-08-11 16:24:14
+ * @ Modified time: 2023-08-23 15:46:10
  * @ Description:
  */
 
@@ -18,7 +18,7 @@ const int g_MSGMAXSIZE = 1024;
 
 const std::string g_TOKEN = "flexiv";
 
-const std::string UPLOADADDRESS = "/home/ftp/";
+const std::string UPLOADADDRESS = "/home/chenwen/ftp/";
 
 std::mutex g_kostalDataMutex;
 

@@ -1,4 +1,4 @@
-Flexiv App Guis
+Flexiv RDKDemo
 ===============
 
 This is a repository contains different applications and rdk programs as a example to show how to use RDK in real project
@@ -16,39 +16,12 @@ Setup build environment
 2. Install some necessary dependencies:
 
 ````
-    sudo apt install -y libjsoncpp-dev libspdlog-dev libusb-0.1-4 libgtest-dev
-```` // Deleted libboost-dev due to we used boost of flexiv_thirdparty2 to install
+    sudo apt install -y libjsoncpp-dev libspdlog-dev 
 
-3. Install qt5 with:
+3. Use flexiv_thirdparty2/scripts build_boost.sh install boost library, you can also download from
+   https://www.boost.org/, what we use boost lib version is 1.72.0
 
-````
-    sudo apt-get install qt5-default
-````
-
-*(Optional)* If you need to use QT creator, you can install qt5 creator with:
-
-````
-    sudo apt-get install qtcreator
-````
-
-4. Clone [flexiv_thirdparty2](https://bitbucket.org/FlexivTeam/flexiv_thirdparty2.git) with:
-
-````
-    git clone https://bitbucket.org/FlexivTeam/flexiv_thirdparty2.git (v2.10/release)
-````
-
-5. Go to the cloned flexiv_thirdparty2 folder and then build necessary libraries individually:
-
-````
-    cd flexiv_thirdparty2
-
-    # bash <build_script> <lib_name>
-    bash build_flexiv_sw_ubuntu_dependencies.sh foonathan_memory_vendor
-    bash build_flexiv_sw_ubuntu_dependencies.sh fast-cdr
-    bash build_flexiv_sw_ubuntu_dependencies.sh fast-dds
-    bash build_flexiv_sw_ubuntu_dependencies.sh fast-dds-gen
-    bash build_flexiv_sw_ubuntu_dependencies.sh fast-rtps-gen
-````
+```
 
 Configure and build the apps
 -------------------------------
@@ -68,16 +41,14 @@ Configure and build the apps
 
 3. Click Configure, then choose the default Unix Makefile configuration. An error will pop out, which is expected.
 
-4. Configure ``flexiv_thirdparty2_path`` to the cloned ``flexiv_thirdparty2`` folder. For example, ``~/Documents/flexiv_thirdparty2``.
+4. Choose the apps to build by checking options starting with ``BUILD_APP_``.
 
-5. Choose the apps to build by checking options starting with ``BUILD_APP_``.
+5. Click Configure then click Generate.
 
-6. Click Configure then click Generate.
-
-7. If no error occurs, close ``cmake-gui`` window, then go back to the terminal and:
+6. If no error occurs, close ``cmake-gui`` window, then go back to the terminal and:
 
 ````
     make -j4
 ````
 
-8. All checked apps will be compiled and the executable binaries are under ``build/app/`` directory.
+7. All checked apps will be compiled and the executable binaries are under ``build/app/`` directory.

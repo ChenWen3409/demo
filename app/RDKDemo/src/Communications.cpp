@@ -2,7 +2,7 @@
  * @ Author: wen chen
  * @ Create Time: 2023-08-09 16:23:50
  * @ Modified by: wen chen
- * @ Modified time: 2023-08-12 15:51:23
+ * @ Modified time: 2023-08-23 17:01:14
  * @ Description:
  */
 #include "Communications.hpp"
@@ -84,8 +84,9 @@ Status Communications::executeCheck()
 
     // Check the terminateStatus and turn on the terminate switch if the answer
     // is True or Yes
-    if (m_terminateStatus == "true" || m_terminateStatus == "True" || m_terminateStatus == "TRUE"
-        || m_terminateStatus == "yes" || m_terminateStatus == "Yes" || m_terminateStatus == "YES") {
+    std::transform(
+        m_terminateStatus.begin(), m_terminateStatus.end(), m_terminateStatus.begin(), ::toupper);
+    if (m_terminateStatus == "TRUE" || m_terminateStatus == "YES") {
         m_terminateSwitch = true;
     } else {
         m_terminateSwitch = false;
@@ -93,8 +94,8 @@ Status Communications::executeCheck()
 
     // Check the queryStatus and turn on the check status flag if the answer is
     // True or Yes
-    if (m_queryStatus == "true" || m_queryStatus == "True" || m_queryStatus == "TRUE"
-        || m_queryStatus == "yes" || m_queryStatus == "Yes" || m_queryStatus == "YES") {
+    std::transform(m_queryStatus.begin(), m_queryStatus.end(), m_queryStatus.begin(), ::toupper);
+    if (m_queryStatus == "TRUE" || m_queryStatus == "YES") {
         m_checkStatusFlag = true;
     } else {
         m_checkStatusFlag = false;
@@ -122,16 +123,21 @@ Status Communications::executeTask(flexiv::Robot* robotPtr)
     }
 
     // 3rd, before executing the task, we need to clear robot data list manually
+    // check whether robot has this plan name first and excute
     m_robotDataList.clear();
 
-    // 4th, run a sync task to execution the workplan and collect the robot data
-    // at the same time
-    // check whether robot has this plan name first
-    std::string planName = m_taskName + m_taskType;
+    std::string planName = m_taskName + "-" + m_taskType + "-MainPlan";
     if (m_robotHandler.checkRobotPlan(robotPtr, planName) == false) {
         return ROBOT;
     }
-    robotPtr->executePlan(planName);
+    // turn on the switch to collect data
+    g_collectSwitch = true;
+
+    // excute robot plan
+    m_robotHandler.excuteRobotPlan(robotPtr, planName);
+
+    // 4th, run a sync task to execution the workplan and collect the robot data
+    // at the same time
     auto robotWorker = std::bind(&kostal::RobotOperations::collectSyncData, m_robotHandler,
         robotPtr, &m_robotData, &m_robotDataList);
     std::thread robotThread(robotWorker);
@@ -140,11 +146,35 @@ Status Communications::executeTask(flexiv::Robot* robotPtr)
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 
+    // turn off the switch to collect data
     g_collectSwitch = false;
 
     // Wait for threads till the end
     robotThread.join();
     k_log->info("The sync task is finished by scheduler");
+
+    // Excute primitive that let robot back to home pose
+    std::cout << "robot back to home" << std::endl;
+    m_robotHandler.executeRobotPrimitiveHome(robotPtr);
+
+    // get globar var list
+    std::vector<std::string> globalVarList;
+    m_robotHandler.getRobotGlobalVar(robotPtr, globalVarList);
+    std::cout << "before set global var lsit" << std::endl;
+    for (int i = 0; i < globalVarList.size(); i++) {
+        std::cout << globalVarList[i] << std::endl;
+    }
+
+    // set globar var
+    std::string globalVarset = "a = 1";
+    m_robotHandler.setRobotGlobalVar(robotPtr, globalVarset);
+
+    // get globar var list
+    m_robotHandler.getRobotGlobalVar(robotPtr, globalVarList);
+    std::cout << "after set global var lsit" << std::endl;
+    for (int i = 0; i < globalVarList.size(); i++) {
+        std::cout << globalVarList[i] << std::endl;
+    }
 
     // 5th, write excel files with collected robot data list and spi data list
     result = m_weHandler.writeDataToExcel(m_taskType, m_taskName, &m_robotDataList);
